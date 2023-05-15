@@ -12,7 +12,7 @@ class DataService {
       carregarCervejas,
       carregarNacoes,
     ];
-
+// teste
     carregadores[index]();
   }
 
