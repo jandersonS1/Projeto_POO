@@ -99,9 +99,11 @@ class DataService {
     PropNacoes();
 
     tableStateNotifier.value = [
-      {"name": "Brasil", "moeda": "Real", "habitantes": "207kk"},
-      {"name": "Brasil", "moeda": "Real", "habitantes": "207kk"},
-      {"name": "Brasil", "moeda": "Real", "habitantes": "207kk"}
+      {"name": "China", "moeda": "Yuan (CNY)", "habitantes": "1,41 Bilhão"},
+      {"name": "India", "moeda": "Rúpia indiana (INR)", "habitantes": "1,38 Bilhão"},
+      {"name": "Estados Unidos", "moeda": "Dólar americano (USD)", "habitantes": "332 Milhões"},
+      {"name": "Indonésia", "moeda": "Rupiah indonésio (IDR)", "habitantes": "275 Milhões"},
+      {"name": "Paquistão", "moeda": "Rupia paquistanesa (PKR)", "habitantes": "225 Milhões"}
     ];
   }
 }
