@@ -35,9 +35,31 @@ class DataService {
     PropCervejas();
 
     tableStateNotifier.value = [
-      {"name": "La Fin Du Monde", "style": "Bock", "ibu": "65"},
-      {"name": "Sapporo Premiume", "style": "Sour Ale", "ibu": "54"},
-      {"name": "Duvel", "style": "Pilsner", "ibu": "82"}
+      {
+      "name": "Westvleteren 12", 
+      "style": "Belgian Quadrupel", 
+      "ibu": "30"
+      },
+      {
+        "name": "Trappist Rochefort 10",
+        "style": "Belgian Quadrupel",
+        "ibu": "100"
+      },
+      {
+      "name": "Westmalle Tripel", 
+      "style": "Tripel", 
+      "ibu": "35"
+      },
+      {
+      "name": "Pliny the Elder", 
+      "style": "American Double IPA", 
+      "ibu": "100"
+      },
+      {
+      "name": "Rochefort 10", 
+      "style": "Belgian Strong Ale", 
+      "ibu": "30"
+      }
     ];
   }
 
@@ -45,21 +67,29 @@ class DataService {
     PropCafes();
 
     tableStateNotifier.value = [
-      {"name": "Kopi Luwak", "intensidade": "6", "nacionalidade": "Indonésia"},
-      {"name": "Blue Mountian", "intensidade": "5", "nacionalidade": "Jamaica"},
+      {
+        "name": "Kopi Luwak",
+        "intensidade": "Nível 6",
+        "nacionalidade": "Indonésia"
+      },
+      {
+        "name": "Blue Mountian",
+        "intensidade": "Nível 5",
+        "nacionalidade": "Jamaica"
+      },
       {
         "name": "Ethiopian Yirgacheffe",
-        "intensidade": "4",
+        "intensidade": "Nível 4",
         "nacionalidade": "Etiópia"
       },
       {
         "name": "Hawaiian Kona",
-        "intensidade": "4",
+        "intensidade": "Nível 4",
         "nacionalidade": "Havaí, Estados Unidos"
       },
       {
         "name": "Colombian Supremo",
-        "intensidade": "3",
+        "intensidade": "Nível 3",
         "nacionalidade": "Colômbia"
       }
     ];
@@ -96,7 +126,7 @@ class MyApp extends StatelessWidget {
           ),
           body: ValueListenableBuilder(
               valueListenable: dataService.tableStateNotifier,
-              builder: (_, value, __) {
+              builder: (, value, _) {
                 return DataTableWidget(
                   jsonObjects: value,
                   propertyNames: dataService.chaves,
