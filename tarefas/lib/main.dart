@@ -126,7 +126,7 @@ class MyApp extends StatelessWidget {
           ),
           body: ValueListenableBuilder(
               valueListenable: dataService.tableStateNotifier,
-              builder: (, value, _) {
+              builder: (_, value, __) {
                 return DataTableWidget(
                   jsonObjects: value,
                   propertyNames: dataService.chaves,
