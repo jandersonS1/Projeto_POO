@@ -1,202 +1,235 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
-
-class DataService {
-  final ValueNotifier<List> tableStateNotifier = new ValueNotifier([]);
-  var chaves = ["name", "style", "ibu"];
-  var colunas = ["Coluna", "Coluna", "Coluna"];
-
-  void carregar(index) {
-    var carregadores = [
-      carregarCafe,
-      carregarCervejas,
-      carregarNacoes,
-    ];
-// teste
-    carregadores[index]();
-  }
-
-  void PropCervejas() {
-    chaves = ["name", "style", "ibu"];
-    colunas = ["Nome", "Estilo", "IBU"];
-  }
-
-  void PropCafes() {
-    chaves = ["name", "intensidade", "nacionalidade"];
-    colunas = ["Nome", "Intensidade", "Nacionalidade"];
-  }
-
-  void PropNacoes() {
-    chaves = ["name", "moeda", "habitantes"];
-    colunas = ["Nome", "Moeda", "Habitantes"];
-  }
-
-  void carregarCervejas() {
-    PropCervejas();
-
-    tableStateNotifier.value = [
-      {
-      "name": "Westvleteren 12", 
-      "style": "Belgian Quadrupel", 
-      "ibu": "30"
-      },
-      {
-        "name": "Trappist Rochefort 10",
-        "style": "Belgian Quadrupel",
-        "ibu": "100"
-      },
-      {
-      "name": "Westmalle Tripel", 
-      "style": "Tripel", 
-      "ibu": "35"
-      },
-      {
-      "name": "Pliny the Elder", 
-      "style": "American Double IPA", 
-      "ibu": "100"
-      },
-      {
-      "name": "Rochefort 10", 
-      "style": "Belgian Strong Ale", 
-      "ibu": "30"
-      }
-    ];
-  }
-
-  void carregarCafe() {
-    PropCafes();
-
-    tableStateNotifier.value = [
-      {
-        "name": "Kopi Luwak",
-        "intensidade": "Nível 6",
-        "nacionalidade": "Indonésia"
-      },
-      {
-        "name": "Blue Mountian",
-        "intensidade": "Nível 5",
-        "nacionalidade": "Jamaica"
-      },
-      {
-        "name": "Ethiopian Yirgacheffe",
-        "intensidade": "Nível 4",
-        "nacionalidade": "Etiópia"
-      },
-      {
-        "name": "Hawaiian Kona",
-        "intensidade": "Nível 4",
-        "nacionalidade": "Havaí, Estados Unidos"
-      },
-      {
-        "name": "Colombian Supremo",
-        "intensidade": "Nível 3",
-        "nacionalidade": "Colômbia"
-      }
-    ];
-  }
-
-  void carregarNacoes() {
-    PropNacoes();
-
-    tableStateNotifier.value = [
-      {"name": "China", "moeda": "Yuan (CNY)", "habitantes": "1,41 Bilhão"},
-      {"name": "India", "moeda": "Rúpia indiana (INR)", "habitantes": "1,38 Bilhão"},
-      {"name": "Estados Unidos", "moeda": "Dólar americano (USD)", "habitantes": "332 Milhões"},
-      {"name": "Indonésia", "moeda": "Rupiah indonésio (IDR)", "habitantes": "275 Milhões"},
-      {"name": "Paquistão", "moeda": "Rupia paquistanesa (PKR)", "habitantes": "225 Milhões"}
-    ];
-  }
-}
-
-final dataService = DataService();
+import 'package:http/http.dart' as http;
 
 void main() {
-  MyApp app = MyApp();
-
-  runApp(app);
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        theme: ThemeData(primarySwatch: Colors.deepPurple),
-        debugShowCheckedModeBanner: false,
-        home: Scaffold(
-          appBar: AppBar(
-            title: const Text("Dicas"),
-          ),
-          body: ValueListenableBuilder(
-              valueListenable: dataService.tableStateNotifier,
-              builder: (_, value, __) {
-                return DataTableWidget(
-                  jsonObjects: value,
-                  propertyNames: dataService.chaves,
-                  columnNames: dataService.colunas,
-                );
-              }),
-          bottomNavigationBar:
-              NewNavBar(itemSelectedCallback: dataService.carregar),
-        ));
+      title: 'Daily Report',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: InitialPage(),
+    );
   }
 }
 
-class NewNavBar extends HookWidget {
-  var itemSelectedCallback; //esse atributo será uma função
+class InitialPage extends StatefulWidget {
+  @override
+  _InitialPageState createState() => _InitialPageState();
+}
 
-  NewNavBar({this.itemSelectedCallback}) {
-    itemSelectedCallback ??= (_) {};
+class _InitialPageState extends State<InitialPage> {
+  TextEditingController _nameController = TextEditingController();
+
+  void _startReports() {
+    String userName = _nameController.text.trim();
+
+    if (userName.isNotEmpty) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => DailyReportPage(userName: userName),
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Por favor, digite seu nome.')),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    var state = useState(0);
-    return BottomNavigationBar(
-        onTap: (index) {
-          state.value = index;
-          print(state.value);
-          itemSelectedCallback(index);
-        },
-        currentIndex: state.value,
-        items: const [
-          BottomNavigationBarItem(
-            label: "Cafés",
-            icon: Icon(Icons.coffee_outlined),
-          ),
-          BottomNavigationBarItem(
-              label: "Cervejas", icon: Icon(Icons.local_drink_outlined)),
-          BottomNavigationBarItem(
-              label: "Nações", icon: Icon(Icons.flag_outlined))
-        ]);
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Daily Report'),
+      ),
+      body: Padding(
+        padding: EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Bem-vindo ao Daily Report!',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 16),
+            TextField(
+              controller: _nameController,
+              decoration: InputDecoration(
+                labelText: 'Nome',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: _startReports,
+              child: Text('Começar Relatos'),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 
-class DataTableWidget extends StatelessWidget {
-  final List jsonObjects;
+class DailyReportPage extends StatefulWidget {
+  final String userName;
 
-  final List<String> columnNames;
+  DailyReportPage({required this.userName});
 
-  final List<String> propertyNames;
+  @override
+  _DailyReportPageState createState() => _DailyReportPageState();
+}
 
-  DataTableWidget(
-      {this.jsonObjects = const [],
-      this.columnNames = const ["Coluna", "Coluna", "Coluna"],
-      this.propertyNames = const ["name", "style", "ibu"]});
+class _DailyReportPageState extends State<DailyReportPage> {
+  List<Map<String, dynamic>> _dailyReports = [];
+  String _currentTime = '';
+  TextEditingController _reportController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _getCurrentTime();
+  }
+
+  @override
+  void dispose() {
+    _reportController.dispose();
+    super.dispose();
+  }
+
+  void _getCurrentTime() {
+    DateTime now = DateTime.now();
+    String formattedTime = '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
+    setState(() {
+      _currentTime = formattedTime;
+    });
+  }
+
+  void _submitReport() {
+    String reportText = _reportController.text.trim();
+
+    if (reportText.isNotEmpty) {
+      DateTime now = DateTime.now();
+      String formattedDate = '${now.day.toString().padLeft(2, '0')}/${now.month.toString().padLeft(2, '0')}/${now.year}';
+
+      Map<String, dynamic> report = {
+        'date': formattedDate,
+        'time': _currentTime,
+        'report': reportText,
+      };
+
+      setState(() {
+        _dailyReports.insert(0, report);
+      });
+
+      _reportController.clear();
+      _getCurrentTime();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Relato enviado com sucesso!')),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Por favor, digite um relato válido.')),
+      );
+    }
+  }
+
+  void _viewPreviousReports() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PreviousReportsPage(dailyReports: _dailyReports),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    return DataTable(
-        columns: columnNames
-            .map((name) => DataColumn(
-                label: Expanded(
-                    child: Text(name,
-                        style: TextStyle(fontStyle: FontStyle.italic)))))
-            .toList(),
-        rows: jsonObjects
-            .map((obj) => DataRow(
-                cells: propertyNames
-                    .map((propName) => DataCell(Text(obj[propName])))
-                    .toList()))
-            .toList());
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Relatório Diário'),
+      ),
+      body: Padding(
+        padding: EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Olá, ${widget.userName}!',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 16),
+            Text(
+              'Data: ${DateTime.now().day.toString().padLeft(2, '0')}/${DateTime.now().month.toString().padLeft(2, '0')}/${DateTime.now().year}',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 16),
+            Text(
+              'Horário: $_currentTime',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 16),
+            TextField(
+              controller: _reportController,
+              onChanged: (text) {
+                // Atualize o valor do relato conforme o usuário digita
+              },
+              maxLines: 4,
+              decoration: InputDecoration(
+                labelText: 'Relato do dia',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: _submitReport,
+              child: Text('Enviar Relato'),
+            ),
+            SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: _viewPreviousReports,
+              child: Text('Ver Relatos Anteriores'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class PreviousReportsPage extends StatelessWidget {
+  final List<Map<String, dynamic>> dailyReports;
+
+  PreviousReportsPage({required this.dailyReports});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Relatos Anteriores'),
+      ),
+      body: Padding(
+        padding: EdgeInsets.all(16.0),
+        child: ListView.builder(
+          itemCount: dailyReports.length,
+          itemBuilder: (context, index) {
+            return ListTile(
+              title: Text(dailyReports[index]['report']),
+              subtitle: Text(
+                '${dailyReports[index]['date']} ${dailyReports[index]['time']}',
+              ),
+            );
+          },
+        ),
+      ),
+    );
   }
 }
