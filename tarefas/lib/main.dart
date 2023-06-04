@@ -1,6 +1,7 @@
-import 'dart:convert';
+import 'dart:html';
+
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'dart:math';
 
 void main() {
   runApp(MyApp());
@@ -10,224 +11,135 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Daily Report',
+      title: 'Qual tipo de Frases seu dia merece?',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: InitialPage(),
+      home: MyHomePage(),
     );
   }
 }
 
-class InitialPage extends StatefulWidget {
-  @override
-  _InitialPageState createState() => _InitialPageState();
-}
+class MyHomePage extends StatelessWidget {
+  final List<String> motivacional = [
+    "A persistência é o caminho do êxito.",
+    "No meio da dificuldade encontra-se a oportunidade.",
+    "Imagine uma nova história para sua vida e acredite nela.",
+  ];
 
-class _InitialPageState extends State<InitialPage> {
-  TextEditingController _nameController = TextEditingController();
+  final List<String> aleatorio = [
+    "A vida é feita de momentos.",
+    "Nunca é tarde demais para ser o que você poderia ter sido.",
+    "Não espere por oportunidades, crie-as.",
+  ];
 
-  void _startReports() {
-    String userName = _nameController.text.trim();
+  final List<String> depressivo = [
+    "Nada faz sentido.",
+    "A vida é uma eterna tristeza.",
+    "O futuro é sombrio.",
+  ];
 
-    if (userName.isNotEmpty) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => DailyReportPage(userName: userName),
-        ),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Por favor, digite seu nome.')),
-      );
-    }
+  final Random random = Random();
+
+  String getMotivationalPhrase() {
+    int index = random.nextInt(motivacional.length);
+    return motivacional[index];
+  }
+
+  String getRandomPhrase() {
+    int index = random.nextInt(aleatorio.length);
+    return aleatorio[index];
+  }
+
+  String getDepressivePhrase() {
+    int index = random.nextInt(depressivo.length);
+    return depressivo[index];
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Daily Report'),
+        title: Text('Qual tipo de Frases seu dia merece?'),
       ),
-      body: Padding(
-        padding: EdgeInsets.all(16.0),
+      body: Center(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Bem-vindo ao Daily Report!',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 16),
-            TextField(
-              controller: _nameController,
-              decoration: InputDecoration(
-                labelText: 'Nome',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            SizedBox(height: 16),
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Text("Esse App é para melhorar seu dia", style: TextStyle(
+        fontSize: 40,
+        color: Color.fromARGB(255, 238, 0, 0),
+      ),),
             ElevatedButton(
-              onPressed: _startReports,
-              child: Text('Começar Relatos'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class DailyReportPage extends StatefulWidget {
-  final String userName;
-
-  DailyReportPage({required this.userName});
-
-  @override
-  _DailyReportPageState createState() => _DailyReportPageState();
-}
-
-class _DailyReportPageState extends State<DailyReportPage> {
-  List<Map<String, dynamic>> _dailyReports = [];
-  String _currentTime = '';
-  TextEditingController _reportController = TextEditingController();
-
-  @override
-  void initState() {
-    super.initState();
-    _getCurrentTime();
-  }
-
-  @override
-  void dispose() {
-    _reportController.dispose();
-    super.dispose();
-  }
-
-  void _getCurrentTime() {
-    DateTime now = DateTime.now();
-    String formattedTime = '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
-    setState(() {
-      _currentTime = formattedTime;
-    });
-  }
-
-  void _submitReport() {
-    String reportText = _reportController.text.trim();
-
-    if (reportText.isNotEmpty) {
-      DateTime now = DateTime.now();
-      String formattedDate = '${now.day.toString().padLeft(2, '0')}/${now.month.toString().padLeft(2, '0')}/${now.year}';
-
-      Map<String, dynamic> report = {
-        'date': formattedDate,
-        'time': _currentTime,
-        'report': reportText,
-      };
-
-      setState(() {
-        _dailyReports.insert(0, report);
-      });
-
-      _reportController.clear();
-      _getCurrentTime();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Relato enviado com sucesso!')),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Por favor, digite um relato válido.')),
-      );
-    }
-  }
-
-  void _viewPreviousReports() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => PreviousReportsPage(dailyReports: _dailyReports),
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Relatório Diário'),
-      ),
-      body: Padding(
-        padding: EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Olá, ${widget.userName}!',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 16),
-            Text(
-              'Data: ${DateTime.now().day.toString().padLeft(2, '0')}/${DateTime.now().month.toString().padLeft(2, '0')}/${DateTime.now().year}',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 16),
-            Text(
-              'Horário: $_currentTime',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 16),
-            TextField(
-              controller: _reportController,
-              onChanged: (text) {
-                // Atualize o valor do relato conforme o usuário digita
+              onPressed: () {
+                String fraseMotivacional = getMotivationalPhrase();
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: Text('Frase Motivacional'),
+                      content: Text(fraseMotivacional),
+                      actions: <Widget>[
+                        TextButton(
+                          child: Text('Fechar'),
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                );
               },
-              maxLines: 4,
-              decoration: InputDecoration(
-                labelText: 'Relato do dia',
-                border: OutlineInputBorder(),
-              ),
+              child: Text('Frases Motivacionais'),
             ),
-            SizedBox(height: 16),
             ElevatedButton(
-              onPressed: _submitReport,
-              child: Text('Enviar Relato'),
+              onPressed: () {
+                String fraseAleatoria = getRandomPhrase();
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: Text('Frase Aleatória'),
+                      content: Text(fraseAleatoria),
+                      actions: <Widget>[
+                        TextButton(
+                          child: Text('Fechar'),
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
+              child: Text('Frases Aleatórias'),
             ),
-            SizedBox(height: 16),
             ElevatedButton(
-              onPressed: _viewPreviousReports,
-              child: Text('Ver Relatos Anteriores'),
+              onPressed: () {
+                String fraseDepressiva = getDepressivePhrase();
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: Text('Frase Depressiva'),
+                      content: Text(fraseDepressiva),
+                      actions: <Widget>[
+                        TextButton(
+                          child: Text('Fechar'),
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
+              child: Text('Frases Depressivas'),
             ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-class PreviousReportsPage extends StatelessWidget {
-  final List<Map<String, dynamic>> dailyReports;
-
-  PreviousReportsPage({required this.dailyReports});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Relatos Anteriores'),
-      ),
-      body: Padding(
-        padding: EdgeInsets.all(16.0),
-        child: ListView.builder(
-          itemCount: dailyReports.length,
-          itemBuilder: (context, index) {
-            return ListTile(
-              title: Text(dailyReports[index]['report']),
-              subtitle: Text(
-                '${dailyReports[index]['date']} ${dailyReports[index]['time']}',
-              ),
-            );
-          },
         ),
       ),
     );
